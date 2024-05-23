@@ -34,9 +34,13 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
     async def receive_json(self, content):
         command = content.get("command", None)
-        if command == "send":
-            await self._send_chat_message(content["message"])
-            await self._save_chat_message(self.room, self.user, content["message"])
+        if command in [
+            "send",
+        ]:
+            message = await self._save_chat_message(
+                self.room, self.user, content["message"]
+            )
+            await self._send_chat_message(message)
 
     @database_sync_to_async
     def _get_or_create_room(self, room_name, user):
@@ -70,20 +74,23 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             self.room_group_name,
             {
                 "type": "chat.message",
-                "message": message,
-                "username": self.user.username,
+                "id": message.id,
+                "content": message.content,
+                "created_at": message.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "creator_username": self.user.username,
+                "creator_email": self.user.email,
             },
         )
 
     async def chat_message(self, event):
-        message = event["message"]
-        username = event["username"]
-
         await self.send_json(
             {
-                "message": message,
-                "username": username,
-            },
+                "id": event["id"],
+                "content": event["content"],
+                "created_at": event["created_at"],
+                "creator_username": event["creator_username"],
+                "creator_email": event["creator_email"],
+            }
         )
 
     @database_sync_to_async
