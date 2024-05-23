@@ -6,4 +6,3 @@ venv/
 .vscode/
 
 db.sqlite3
-core/migrations/
