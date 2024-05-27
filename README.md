@@ -7,7 +7,7 @@ Djangologue is a real-time chat application built with Django, utilizing Django 
 - Real-time messaging: Engage in instant messaging with other users using WebSockets for real-time communication.
 - User authentication and room permission checks: Securely login to access the chat application and join only the rooms you have permission to access, ensuring privacy and security.
 - Message storage and retrieval: All messages are stored in the database and can be retrieved via a RESTful API endpoint.
-
+- RabbitMQ integration: Utilizes RabbitMQ for sending emails asynchronously.
 
 
 ## Requirements
@@ -17,6 +17,7 @@ Djangologue is a real-time chat application built with Django, utilizing Django 
 - Django Rest Framework
 - Django Channels
 - Daphne
+- RabbitMQ
 
 ## Installation
 
@@ -41,7 +42,11 @@ python manage.py migrate
 ```bash
 python manage.py runserver
 ```
-5. Access the application at http://localhost:8000/.
+5. Run RabbitMQ consumer for email sending:
+```bash
+python manage.py consume_rabbitmq
+```
+6. Access the application at http://localhost:8000/.
 
 ## Contributing
 Contributions are welcome! Please feel free to open issues or submit pull requests.
