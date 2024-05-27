@@ -1,6 +1,7 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from core.models import Room, Membership, MembershipStatus
+from rabbitmq import rabbitmq_client
 
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
@@ -36,11 +37,16 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         command = content.get("command", None)
         if command in [
             "send",
+            "send_and_notify",
         ]:
             message = await self._save_chat_message(
                 self.room, self.user, content["message"]
             )
             await self._send_chat_message(message)
+
+        if command == "send_and_notify":
+            emails = content.get("receivers", [])
+            rabbitmq_client.publish_email({"receivers": emails, "content": message.content})
 
     @database_sync_to_async
     def _get_or_create_room(self, room_name, user):
